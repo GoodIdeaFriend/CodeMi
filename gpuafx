@@ -1,0 +1,130 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Unity.Jobs;
+using Unity.Collections;
+
+
+public class GPUaFX : MonoBehaviour
+{
+    /*AtomGroup\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\|//////////////////////////////*/
+    [SerializeField]
+    private int _objectsCountAtomGroup = 20;
+    [SerializeField]
+    private ComputeShader _shaderAtomGroup;
+    [SerializeField]
+    private GameObject _prefabWater;
+
+    private ComputeBuffer _bufferAtom8;
+    private ComputeBuffer _bufferPositionAtoms;
+    private ComputeBuffer _bufferChanPositionAtoms;
+    private ComputeBuffer _bufferMendeleevTable;
+
+    private int _kernelIndexAtomGroup;
+    private uint _threadGroupSizeAtomGroup;
+
+    [SerializeField] private Vector4[] _resultPositionsWater;
+    [SerializeField] private Vector4[] _resultPositionsWaterOnStart;
+
+    private NativeArray<Vector3> _inputFX;
+    private NativeArray<Vector3> _outputFX;
+    private Vector3 tFX;
+    private int[] _MendeleevTable;
+
+    private Transform[] _objectsWater;
+    private int threadGroupsOne;
+    int counterFU = 100;
+
+    private bool blStart = true;
+
+    private void Awake()
+    {
+        
+
+        _kernelIndexAtomGroup = _shaderAtomGroup.FindKernel("AtomGroup");
+    _shaderAtomGroup.GetKernelThreadGroupSizes(_kernelIndexAtomGroup, out _threadGroupSizeAtomGroup, out _, out _);
+
+    _objectsCountAtomGroup *= (int)_threadGroupSizeAtomGroup;
+
+    _inputFX = new NativeArray<Vector3>(_objectsCountAtomGroup, Allocator.TempJob);
+    _outputFX = new NativeArray<Vector3>(_objectsCountAtomGroup, Allocator.TempJob);
+
+    
+            
+    _bufferAtom8 = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float) * 24);
+    _bufferPositionAtoms = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float) * 4);
+    _bufferChanPositionAtoms = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float) * 4);
+    _bufferMendeleevTable = new ComputeBuffer(_objectsCountAtomGroup, sizeof(int));
+
+    
+    _resultPositionsWater = new Vector4[_objectsCountAtomGroup];
+    _resultPositionsWaterOnStart = new Vector4[_objectsCountAtomGroup];
+    _MendeleevTable = new int[_objectsCountAtomGroup];
+    _objectsWater = new Transform[_objectsCountAtomGroup]; 
+    for (int i = 0; i < _objectsCountAtomGroup; i++)
+    {
+        _objectsWater[i] = Instantiate(_prefabWater, transform).transform;
+        _objectsWater[i].gameObject.SetActive(true);
+    }
+    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "Atomsroommates", _bufferAtom8);
+    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "PositionAtoms", _bufferPositionAtoms);
+    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "ChanPositionAtoms", _bufferChanPositionAtoms);
+    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "MendeleevTable", _bufferMendeleevTable);
+
+
+    threadGroupsOne = (int) (_objectsCountAtomGroup / _threadGroupSizeAtomGroup);
+        
+        _resultPositionsWaterOnStart[0] = new Vector4(0,0,0,0);
+        _resultPositionsWaterOnStart[1] = new Vector4(1,0,0,0);
+        _bufferPositionAtoms.SetData(_resultPositionsWaterOnStart);
+    }
+
+private void FixedUpdate() 
+{
+    /*if(blStart)
+    {
+        
+    blStart = false;
+    };*/
+    /*var joboncpu = new JobOnCpu()
+    {
+        InputFX = _inputFX,
+        OutputFX = _outputFX
+    };
+
+    var moveAtom = joboncpu.Schedule(_objectsCountAtomGroup, 8);
+    moveAtom.Complete();*/
+    
+    _shaderAtomGroup.Dispatch(_kernelIndexAtomGroup, threadGroupsOne, 1, 1);
+    
+    if (counterFU >= 100){
+      _bufferMendeleevTable.GetData(_MendeleevTable);
+      counterFU = 0;
+    }counterFU++;
+    
+    _bufferPositionAtoms.GetData(_resultPositionsWater);
+    
+    
+
+    for (int i = 0; i < _objectsWater.Length; i++){
+        if ( /*_MendeleevTable[i] == 1*/ true)//Water
+        {
+            /*_inputFX[1] = new Vector3(1,1,1);
+           _objectsWater[i].localPosition = _outputFX[i];*/
+            _objectsWater[i].localPosition = _resultPositionsWater[i];
+        }
+    }
+}
+
+private void OnDestroy()
+{
+    _bufferPositionAtoms.Dispose();
+    _bufferChanPositionAtoms.Dispose();
+    _bufferAtom8.Dispose();
+    _bufferMendeleevTable.Dispose();
+    _inputFX.Dispose();
+    _outputFX.Dispose();
+
+}
+}
