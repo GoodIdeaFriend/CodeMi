@@ -1,0 +1,42 @@
+struct stHoneycombs{
+    uint uintHoneycombs[24];
+};
+RWStructuredBuffer<int> MendeleevTable;
+RWStructuredBuffer<stHoneycombs> Atomsroommates;
+RWStructuredBuffer<float4> PositionAtoms;
+RWStructuredBuffer<float4> ChanPositionAtoms;
+//float arrtrifloats[1];
+
+bool blStartCompleted;
+
+#pragma kernel AtomGroup
+[numthreads(1,1,1)]
+void AtomGroup (uint3 id : SV_DispatchThreadID)
+{
+    float3 physHoneyTop;
+    float3 physHoneBot;
+    float3 physHoneyFront;
+    float3 physHoneyBehind;
+    float3 physHoneyLeft;
+    float3 physHoneyRight;
+    
+    float3 gravHoneyTop;
+    float3 gravHoneyBot;
+    float3 gravHoneyFront;
+    float3 gravHoneyBehind;
+    float3 gravHoneyLeft;
+    float3 gravHoneyRight;
+    ChanPositionAtoms[id.x] = float4(Atomsroommates[id.x].uintHoneycombs[1], 0.1, 0.1, 0.1);
+    PositionAtoms[id.x] += ChanPositionAtoms[id.x];
+    //         1047999
+    /*Atomsroommates[id.x].uintHoneycombs[1] += 1;
+    MendeleevTable[id.x] = 1;
+    
+    PositionAtoms[id.x] = float4(Atomsroommates[id.x].uintHoneycombs[1], id.x , id.x, id.x); */
+    //PositionAtoms[id.x] += float4(0, 0, id.x * 0.0001, id.x * 0.0001);
+    /*if (false){
+    PositionAtoms[id.x] = float4(Atomsroommates[id.x].uintHoneycombs[1], id.x , id.x, id.x);
+    }else{
+    PositionAtoms[id.x] += float4(Atomsroommates[id.x].uintHoneycombs[1], id.x , id.x, id.x);
+    }*/
+}
