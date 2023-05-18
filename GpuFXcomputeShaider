@@ -1,33 +1,35 @@
 struct stHoneycombs{
-    uint uintHoneycombs[24];
+    uint uintHoneycombs[14];
+    float divider;
+    float counter;
 };
-RWStructuredBuffer<int> MendeleevTable;
+
 RWStructuredBuffer<stHoneycombs> Atomsroommates;
+RWStructuredBuffer<float4> Orientation;
 RWStructuredBuffer<float4> PositionAtoms;
-RWStructuredBuffer<float4> ChanPositionAtoms;
 //float arrtrifloats[1];
 
-bool blStartCompleted;
 
 #pragma kernel AtomGroup
 [numthreads(1,1,1)]
 void AtomGroup (uint3 id : SV_DispatchThreadID)
 {
-    float3 physHoneyTop;
-    float3 physHoneBot;
-    float3 physHoneyFront;
-    float3 physHoneyBehind;
-    float3 physHoneyLeft;
-    float3 physHoneyRight;
-    
-    float3 gravHoneyTop;
-    float3 gravHoneyBot;
-    float3 gravHoneyFront;
-    float3 gravHoneyBehind;
-    float3 gravHoneyLeft;
-    float3 gravHoneyRight;
-    ChanPositionAtoms[id.x] = float4(Atomsroommates[id.x].uintHoneycombs[1], 0.1, 0.1, 0.1);
-    PositionAtoms[id.x] += ChanPositionAtoms[id.x];
+    float4 ChanPositionAtoms;
+    if(Orientation[0].w == 1) //тик
+    {
+        if(Atomsroommates[id.x].counter >= Atomsroommates[id.x].divider)
+        {
+        ChanPositionAtoms = float4(Orientation[1].y, 0.1, 0.1, 0.1) * 1;
+        Atomsroommates[id.x].counter = 0;
+        PositionAtoms[id.x] += ChanPositionAtoms;
+        }Atomsroommates[id.x].counter++;
+    }
+    else //Старт
+    {
+        Atomsroommates[id.x].divider = 10000;
+        Atomsroommates[id.x].counter = 0;
+        Orientation[0].w = 1;
+    }
     //         1047999
     /*Atomsroommates[id.x].uintHoneycombs[1] += 1;
     MendeleevTable[id.x] = 1;
