@@ -24,7 +24,7 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
         PositionAtoms[id.x] += ChanPositionAtoms;
         }Atomsroommates[id.x].counter++;
     }
-    else //Старт
+    else //Старт тик
     {
         Atomsroommates[id.x].divider = 10000;
         Atomsroommates[id.x].counter = 0;
