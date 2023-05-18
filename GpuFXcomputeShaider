@@ -14,7 +14,7 @@ RWStructuredBuffer<float4> PositionAtoms;
 [numthreads(1,1,1)]
 void AtomGroup (uint3 id : SV_DispatchThreadID)
 {
-    float4 ChanPositionAtoms;
+    float4 ChanPositionAtoms = 0;
     if(Orientation[0].w == 1) //тик
     {
         if(Atomsroommates[id.x].counter >= Atomsroommates[id.x].divider)
@@ -26,6 +26,12 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
     }
     else //Старт тик
     {
+        Atomsroommates[id.x].uintHoneycombs[0] = 0;//x
+        Atomsroommates[id.x].uintHoneycombs[1] = 1;//-x
+        Atomsroommates[id.x].uintHoneycombs[2] = 2;//y
+        Atomsroommates[id.x].uintHoneycombs[3] = 0;//-y
+        Atomsroommates[id.x].uintHoneycombs[4] = 0;//z
+        Atomsroommates[id.x].uintHoneycombs[5] = 0;//-z
         Atomsroommates[id.x].divider = 10000;
         Atomsroommates[id.x].counter = 0;
         Orientation[0].w = 1;
