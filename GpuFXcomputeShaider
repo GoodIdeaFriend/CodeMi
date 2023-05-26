@@ -5,27 +5,35 @@ struct stHoneycombs{
 };
 
 RWStructuredBuffer<stHoneycombs> Atomsroommates;
-RWStructuredBuffer<float4> Orientation;
+RWStructuredBuffer<int> RegulatorTick;
 RWStructuredBuffer<float4> PositionAtoms;
+RWStructuredBuffer<int> StCountr;
 //float arrtrifloats[1];
-
+uint quantity;
 
 #pragma kernel AtomGroup
 [numthreads(1,1,1)]
 void AtomGroup (uint3 id : SV_DispatchThreadID)
 {
     float4 ChanPositionAtoms = 0;
-    if(Orientation[0].w == 1) //тик
+    if(RegulatorTick[0] == 1) //тик
     {
         if(Atomsroommates[id.x].counter >= Atomsroommates[id.x].divider)
         {
-        ChanPositionAtoms = float4(Orientation[1].y, 0.1, 0.1, 0.1) * 1;
+        ChanPositionAtoms = float4(0.1, RegulatorTick[0], 0.1, 0.1) * 1;
         Atomsroommates[id.x].counter = 0;
         PositionAtoms[id.x] += ChanPositionAtoms;
         }Atomsroommates[id.x].counter++;
     }
-    else //Старт тик
+    else if(RegulatorTick[0] == 0) //Старт тик
     {
+
+        if(StCountr[id.x] < quantity)
+        {
+            StCountr[id.x]++;
+        }else{
+            RegulatorTick[0] = 1;
+        }
         Atomsroommates[id.x].uintHoneycombs[0] = 0;//x
         Atomsroommates[id.x].uintHoneycombs[1] = 1;//-x
         Atomsroommates[id.x].uintHoneycombs[2] = 2;//y
@@ -34,7 +42,7 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
         Atomsroommates[id.x].uintHoneycombs[5] = 0;//-z
         Atomsroommates[id.x].divider = 10000;
         Atomsroommates[id.x].counter = 0;
-        Orientation[0].w = 1;
+        
     }
     //         1047999
     /*Atomsroommates[id.x].uintHoneycombs[1] += 1;
