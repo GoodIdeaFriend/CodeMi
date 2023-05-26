@@ -5,6 +5,12 @@ using UnityEngine;
 using Unity.Jobs;
 using Unity.Collections;
 
+    public struct stHoneycombs
+    {
+	public uint[] uintHoneycombs;
+
+    }
+
 
 public class GPUaFX : MonoBehaviour
 {
@@ -13,19 +19,23 @@ public class GPUaFX : MonoBehaviour
     private int _objectsCountAtomGroup = 20;
     [SerializeField]
     private ComputeShader _shaderAtomGroup;
+
     [SerializeField]
     private GameObject _prefabWater;
 
-    private ComputeBuffer _bufferAtom8;
+    private ComputeBuffer _bufferSharedHeap;
     private ComputeBuffer _bufferPositionAtoms;
-    private ComputeBuffer _bufferChanPositionAtoms;
-    private ComputeBuffer _bufferMendeleevTable;
+    private ComputeBuffer _bufferOrientation;
+    private ComputeBuffer _bufferStartCounter;
+
+    static public stHoneycombs[] stHoneycombsArray;
 
     private int _kernelIndexAtomGroup;
     private uint _threadGroupSizeAtomGroup;
 
     [SerializeField] private Vector4[] _resultPositionsWater;
     [SerializeField] private Vector4[] _resultPositionsWaterOnStart;
+     private int[] _resultOrientationOnStart;
 
     private NativeArray<Vector3> _inputFX;
     private NativeArray<Vector3> _outputFX;
@@ -34,15 +44,18 @@ public class GPUaFX : MonoBehaviour
 
     private Transform[] _objectsWater;
     private int threadGroupsOne;
-    int counterFU = 100;
+    int counterFU = 1000;
+    int counterD1 = 0;
+    [SerializeField]int counterD2 = 100;
 
     private bool blStart = true;
 
-    private void Awake()
-    {
+private void Awake()
+{
         
 
-        _kernelIndexAtomGroup = _shaderAtomGroup.FindKernel("AtomGroup");
+    _kernelIndexAtomGroup = _shaderAtomGroup.FindKernel("AtomGroup");
+
     _shaderAtomGroup.GetKernelThreadGroupSizes(_kernelIndexAtomGroup, out _threadGroupSizeAtomGroup, out _, out _);
 
     _objectsCountAtomGroup *= (int)_threadGroupSizeAtomGroup;
@@ -52,14 +65,17 @@ public class GPUaFX : MonoBehaviour
 
     
             
-    _bufferAtom8 = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float) * 24);
+    _bufferSharedHeap = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float) * 16);
     _bufferPositionAtoms = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float) * 4);
-    _bufferChanPositionAtoms = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float) * 4);
-    _bufferMendeleevTable = new ComputeBuffer(_objectsCountAtomGroup, sizeof(int));
+    _bufferOrientation = new ComputeBuffer(1, sizeof(float));
+    _bufferStartCounter = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float));
+
+    stHoneycombsArray = new stHoneycombs[_objectsCountAtomGroup];
 
     
     _resultPositionsWater = new Vector4[_objectsCountAtomGroup];
     _resultPositionsWaterOnStart = new Vector4[_objectsCountAtomGroup];
+    _resultOrientationOnStart= new int[1];
     _MendeleevTable = new int[_objectsCountAtomGroup];
     _objectsWater = new Transform[_objectsCountAtomGroup]; 
     for (int i = 0; i < _objectsCountAtomGroup; i++)
@@ -67,20 +83,53 @@ public class GPUaFX : MonoBehaviour
         _objectsWater[i] = Instantiate(_prefabWater, transform).transform;
         _objectsWater[i].gameObject.SetActive(true);
     }
-    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "Atomsroommates", _bufferAtom8);
+    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "Atomsroommates", _bufferSharedHeap);
     _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "PositionAtoms", _bufferPositionAtoms);
-    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "ChanPositionAtoms", _bufferChanPositionAtoms);
-    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "MendeleevTable", _bufferMendeleevTable);
+    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "RegulatorTick", _bufferOrientation);
+    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "StCountr", _bufferStartCounter);
 
+    
 
     threadGroupsOne = (int) (_objectsCountAtomGroup / _threadGroupSizeAtomGroup);
         
-        _resultPositionsWaterOnStart[0] = new Vector4(0,0,0,0);
-        _resultPositionsWaterOnStart[1] = new Vector4(1,0,0,0);
-        _bufferPositionAtoms.SetData(_resultPositionsWaterOnStart);
-    }
+    _resultPositionsWaterOnStart[0] = new Vector4(1,0,0,0);
+    _resultPositionsWaterOnStart[1] = new Vector4(2,0,0,0);
+    _bufferPositionAtoms.SetData(_resultPositionsWaterOnStart);
 
-private void FixedUpdate() 
+    _resultOrientationOnStart[0] = 0;
+    _bufferOrientation.SetData(_resultOrientationOnStart);
+
+    _shaderAtomGroup.SetInt("quantity", _objectsCountAtomGroup);
+
+    
+    
+
+    /*stHoneycombsArray[0].uintHoneycombs[0] = 1;
+    stHoneycombsArray[0].uintHoneycombs[1] = 2;
+    stHoneycombsArray[0].uintHoneycombs[2] = 0;
+    stHoneycombsArray[0].uintHoneycombs[3] = 0;
+    stHoneycombsArray[0].uintHoneycombs[4] = 0;
+    stHoneycombsArray[0].uintHoneycombs[5] = 0;
+
+    stHoneycombsArray[1].uintHoneycombs[0] = 0;
+    stHoneycombsArray[1].uintHoneycombs[1] = 2;
+    stHoneycombsArray[1].uintHoneycombs[2] = 0;
+    stHoneycombsArray[1].uintHoneycombs[3] = 0;
+    stHoneycombsArray[1].uintHoneycombs[4] = 0;
+    stHoneycombsArray[1].uintHoneycombs[5] = 0;
+
+    stHoneycombsArray[2].uintHoneycombs[0] = 0;
+    stHoneycombsArray[2].uintHoneycombs[1] = 1;
+    stHoneycombsArray[2].uintHoneycombs[2] = 0;
+    stHoneycombsArray[2].uintHoneycombs[3] = 0;
+    stHoneycombsArray[2].uintHoneycombs[4] = 0;
+    stHoneycombsArray[2].uintHoneycombs[5] = 0;*/
+
+    //_bufferSharedHeap.SetData(stHoneycombsArray);
+    //counterD1 = counterD2;
+}
+
+private void Update() 
 {
     /*if(blStart)
     {
@@ -95,13 +144,16 @@ private void FixedUpdate()
 
     var moveAtom = joboncpu.Schedule(_objectsCountAtomGroup, 8);
     moveAtom.Complete();*/
+    while (counterD1 <= counterD2)
+    {
+      _shaderAtomGroup.Dispatch(_kernelIndexAtomGroup, threadGroupsOne, 1, 1);
+      counterD1++;  
+    }counterD1 = 0;
     
-    _shaderAtomGroup.Dispatch(_kernelIndexAtomGroup, threadGroupsOne, 1, 1);
-    
-    if (counterFU >= 100){
+    /*if (counterFU >= 100){
       _bufferMendeleevTable.GetData(_MendeleevTable);
       counterFU = 0;
-    }counterFU++;
+    }counterFU++;*/
     
     _bufferPositionAtoms.GetData(_resultPositionsWater);
     
@@ -120,11 +172,10 @@ private void FixedUpdate()
 private void OnDestroy()
 {
     _bufferPositionAtoms.Dispose();
-    _bufferChanPositionAtoms.Dispose();
-    _bufferAtom8.Dispose();
-    _bufferMendeleevTable.Dispose();
-    _inputFX.Dispose();
-    _outputFX.Dispose();
-
+    _bufferOrientation.Dispose();
+    _bufferSharedHeap.Dispose();
+    _bufferStartCounter.Dispose();
+    /*_inputFX.Dispose();
+    _outputFX.Dispose();*/
 }
 }
