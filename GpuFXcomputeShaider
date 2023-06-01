@@ -25,7 +25,7 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
         PositionAtoms[id.x] += ChanPositionAtoms;
         }Atomsroommates[id.x].counter++;
     }
-    else if(RegulatorTick[0] == 0) //Старт тик1.1547 0.57735
+    else if(RegulatorTick[0] == 0) //Старт тик (1.1547 0.57735)
     {
 
         if(StCountr[id.x] < quantity)
@@ -42,21 +42,21 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
                         {
                             if(DirOfView.z > -0.57735)
                             {//z
-                                
+                                Atomsroommates[id.x].uintHoneycombs[4] = StCountr[id.x];
                             }else{//-z
-
+                                Atomsroommates[id.x].uintHoneycombs[5] = StCountr[id.x];
                             }
                         }else{//y
-                            
+                            Atomsroommates[id.x].uintHoneycombs[2] = StCountr[id.x];
                         }
                     }else{//-y
-                        
+                        Atomsroommates[id.x].uintHoneycombs[3] = StCountr[id.x];
                     }
                 }else{//x
-                    
+                    Atomsroommates[id.x].uintHoneycombs[0] = StCountr[id.x];
                 }
             }else{//-x
-                
+                Atomsroommates[id.x].uintHoneycombs[1] = StCountr[id.x];
             }
             Atomsroommates[id.x].uintHoneycombs[0] = 0;//x
         Atomsroommates[id.x].uintHoneycombs[1] = 1;//-x
