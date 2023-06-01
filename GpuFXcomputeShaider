@@ -32,6 +32,8 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
         {
             float3 DirOfView;
             DirOfView = normalize(PositionAtoms[StCountr[id.x]].xyz - PositionAtoms[id.x].xyz);
+            float NewObg;
+            NewObg = distance(PositionAtoms[StCountr[id.x]].xyz, PositionAtoms[id.x].xyz);
             if(DirOfView.x > -0.57735)
             {
                 if(DirOfView.x < 0.57735)
@@ -42,21 +44,27 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
                         {
                             if(DirOfView.z > -0.57735)
                             {//z
-                                Atomsroommates[id.x].uintHoneycombs[4] = StCountr[id.x];
+                                if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[4]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                                Atomsroommates[id.x].uintHoneycombs[4] = StCountr[id.x];}
                             }else{//-z
-                                Atomsroommates[id.x].uintHoneycombs[5] = StCountr[id.x];
+                                if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[5]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                                Atomsroommates[id.x].uintHoneycombs[5] = StCountr[id.x];}
                             }
                         }else{//y
-                            Atomsroommates[id.x].uintHoneycombs[2] = StCountr[id.x];
+                            if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[2]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                            Atomsroommates[id.x].uintHoneycombs[2] = StCountr[id.x];}
                         }
                     }else{//-y
-                        Atomsroommates[id.x].uintHoneycombs[3] = StCountr[id.x];
+                        if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[3]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                        Atomsroommates[id.x].uintHoneycombs[3] = StCountr[id.x];}
                     }
                 }else{//x
-                    Atomsroommates[id.x].uintHoneycombs[0] = StCountr[id.x];
+                    if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[0]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                    Atomsroommates[id.x].uintHoneycombs[0] = StCountr[id.x];}
                 }
             }else{//-x
-                Atomsroommates[id.x].uintHoneycombs[1] = StCountr[id.x];
+                if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[1]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                Atomsroommates[id.x].uintHoneycombs[1] = StCountr[id.x];}
             }
             Atomsroommates[id.x].uintHoneycombs[0] = 0;//x
         Atomsroommates[id.x].uintHoneycombs[1] = 1;//-x
