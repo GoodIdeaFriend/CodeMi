@@ -25,23 +25,58 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
         PositionAtoms[id.x] += ChanPositionAtoms;
         }Atomsroommates[id.x].counter++;
     }
-    else if(RegulatorTick[0] == 0) //Старт тик
+    else if(RegulatorTick[0] == 0) //Старт тик1.1547 0.57735
     {
 
         if(StCountr[id.x] < quantity)
         {
-            StCountr[id.x]++;
-        }else{
-            RegulatorTick[0] = 1;
-        }
-        Atomsroommates[id.x].uintHoneycombs[0] = 0;//x
+            float3 DirOfView;
+            DirOfView = normalize(PositionAtoms[StCountr[id.x]].xyz - PositionAtoms[id.x].xyz);
+            if(DirOfView.x > -0.57735)
+            {
+                if(DirOfView.x < 0.57735)
+                {
+                    if(DirOfView.y > -0.57735)
+                    {
+                        if(DirOfView.y < 0.57735)
+                        {
+                            if(DirOfView.z > -0.57735)
+                            {//z
+                                
+                            }else{//-z
+
+                            }
+                        }else{//y
+                            
+                        }
+                    }else{//-y
+                        
+                    }
+                }else{//x
+                    
+                }
+            }else{//-x
+                
+            }
+            Atomsroommates[id.x].uintHoneycombs[0] = 0;//x
         Atomsroommates[id.x].uintHoneycombs[1] = 1;//-x
         Atomsroommates[id.x].uintHoneycombs[2] = 2;//y
         Atomsroommates[id.x].uintHoneycombs[3] = 0;//-y
         Atomsroommates[id.x].uintHoneycombs[4] = 0;//z
         Atomsroommates[id.x].uintHoneycombs[5] = 0;//-z
-        Atomsroommates[id.x].divider = 10000;
-        Atomsroommates[id.x].counter = 0;
+            StCountr[id.x]++;
+        }else{
+            Atomsroommates[id.x].divider = 10000;
+            Atomsroommates[id.x].counter = 0;
+            RegulatorTick[0] = 1;
+        }
+        /*Atomsroommates[id.x].uintHoneycombs[0] = 0;//x
+        Atomsroommates[id.x].uintHoneycombs[1] = 1;//-x
+        Atomsroommates[id.x].uintHoneycombs[2] = 2;//y
+        Atomsroommates[id.x].uintHoneycombs[3] = 0;//-y
+        Atomsroommates[id.x].uintHoneycombs[4] = 0;//z
+        Atomsroommates[id.x].uintHoneycombs[5] = 0;//-z*/
+        
         
     }
     //         1047999
