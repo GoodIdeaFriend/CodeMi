@@ -5,11 +5,7 @@ using UnityEngine;
 using Unity.Jobs;
 using Unity.Collections;
 
-    public struct stHoneycombs
-    {
-	public uint[] uintHoneycombs;
 
-    }
 
 
 public class GPUaFX : MonoBehaviour
@@ -25,10 +21,8 @@ public class GPUaFX : MonoBehaviour
 
     private ComputeBuffer _bufferSharedHeap;
     private ComputeBuffer _bufferPositionAtoms;
-    private ComputeBuffer _bufferOrientation;
+    private ComputeBuffer _bufferRegulatorTick;
     private ComputeBuffer _bufferStartCounter;
-
-    static public stHoneycombs[] stHoneycombsArray;
 
     private int _kernelIndexAtomGroup;
     private uint _threadGroupSizeAtomGroup;
@@ -43,7 +37,7 @@ public class GPUaFX : MonoBehaviour
     private int[] _MendeleevTable;
 
     private Transform[] _objectsWater;
-    private int threadGroupsOne;
+    [SerializeField]private int threadGroupsOne;
     int counterFU = 1000;
     int counterD1 = 0;
     [SerializeField]int counterD2 = 100;
@@ -67,10 +61,9 @@ private void Awake()
             
     _bufferSharedHeap = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float) * 16);
     _bufferPositionAtoms = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float) * 4);
-    _bufferOrientation = new ComputeBuffer(1, sizeof(float));
+    _bufferRegulatorTick = new ComputeBuffer(1, sizeof(float));
     _bufferStartCounter = new ComputeBuffer(_objectsCountAtomGroup, sizeof(float));
 
-    stHoneycombsArray = new stHoneycombs[_objectsCountAtomGroup];
 
     
     _resultPositionsWater = new Vector4[_objectsCountAtomGroup];
@@ -85,7 +78,7 @@ private void Awake()
     }
     _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "Atomsroommates", _bufferSharedHeap);
     _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "PositionAtoms", _bufferPositionAtoms);
-    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "RegulatorTick", _bufferOrientation);
+    _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "RegulatorTick", _bufferRegulatorTick);
     _shaderAtomGroup.SetBuffer(_kernelIndexAtomGroup, "StCountr", _bufferStartCounter);
 
     
@@ -97,7 +90,7 @@ private void Awake()
     _bufferPositionAtoms.SetData(_resultPositionsWaterOnStart);
 
     _resultOrientationOnStart[0] = 0;
-    _bufferOrientation.SetData(_resultOrientationOnStart);
+    _bufferRegulatorTick.SetData(_resultOrientationOnStart);
 
     _shaderAtomGroup.SetInt("quantity", _objectsCountAtomGroup);
 
@@ -172,7 +165,7 @@ private void Update()
 private void OnDestroy()
 {
     _bufferPositionAtoms.Dispose();
-    _bufferOrientation.Dispose();
+    _bufferRegulatorTick.Dispose();
     _bufferSharedHeap.Dispose();
     _bufferStartCounter.Dispose();
     /*_inputFX.Dispose();
