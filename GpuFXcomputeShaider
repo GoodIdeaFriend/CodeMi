@@ -20,7 +20,48 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
     {
         if(Atomsroommates[id.x].counter >= Atomsroommates[id.x].divider)
         {
-        ChanPositionAtoms = float4(0.1, RegulatorTick[0], 0.1, 0.1) * 1;
+            bool blwhOne = true;
+            while(blwhOne){
+                bool blwhTwo = false;
+                bool blwhTwoA = false;
+                bool blwhTwoB = false;
+                bool blwhTwoC = false;
+                bool blwhTwoD = false;
+                bool blwhTwoE = false;
+                int blintOne = 0;
+                if(blwhTwo == true){//x
+                    
+                }else{
+                    blintOne ++;
+                }
+                if(blwhTwoA == true){//-x
+                    
+                }else{
+                    blintOne ++;
+                }
+                if(blwhTwoB == true){//y
+                    
+                }else{
+                    blintOne ++;
+                }
+                if(blwhTwoC == true){//-y
+                    
+                }else{
+                    blintOne ++;
+                }
+                if(blwhTwoD == true){//z
+                    
+                }else{
+                    blintOne ++;
+                }
+                if(blwhTwoE == true){//-z
+                    
+                }else{
+                    blintOne ++;
+                }
+              /*Stop*/  if(blintOne >= 5){blwhOne = false;}
+            }
+        ChanPositionAtoms += float4(0.1, RegulatorTick[0], 0.1, 0.1) * 1;
         Atomsroommates[id.x].counter = 0;
         PositionAtoms[id.x] += ChanPositionAtoms;
         }Atomsroommates[id.x].counter++;
