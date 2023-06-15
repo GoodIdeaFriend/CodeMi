@@ -15,22 +15,24 @@ uint quantity;
 [numthreads(1,1,1)]
 void AtomGroup (uint3 id : SV_DispatchThreadID)
 {
-    float4 ChanPositionAtoms = 0;
     if(RegulatorTick[0] == 1) //тик
     {
         if(Atomsroommates[id.x].counter >= Atomsroommates[id.x].divider)
         {
             bool blwhOne = true;
+            bool blwhTwo = true;
+            bool blwhTwoA = false;
+            bool blwhTwoB = false;
+            bool blwhTwoC = false;
+            bool blwhTwoD = false;
+            bool blwhTwoE = false;
+            float4 OldPosF4;
             while(blwhOne){
-                bool blwhTwo = false;
-                bool blwhTwoA = false;
-                bool blwhTwoB = false;
-                bool blwhTwoC = false;
-                bool blwhTwoD = false;
-                bool blwhTwoE = false;
+                OldPosF4 = PositionAtoms[id.x];
                 int blintOne = 0;
                 if(blwhTwo == true){//x
-                    
+                    OldPosF4 += (normalize(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[0]] - PositionAtoms[id.x])) * 0.0001;
+                    blintOne ++;
                 }else{
                     blintOne ++;
                 }
@@ -61,9 +63,9 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
                 }
               /*Stop*/  if(blintOne >= 5){blwhOne = false;}
             }
-        ChanPositionAtoms += float4(0.1, RegulatorTick[0], 0.1, 0.1) * 1;
+        //OldPosF4 += float4(0.1, RegulatorTick[0], 0.1, 0.1) * 1;
         Atomsroommates[id.x].counter = 0;
-        PositionAtoms[id.x] += ChanPositionAtoms;
+        PositionAtoms[id.x] += OldPosF4;
         }Atomsroommates[id.x].counter++;
     }
     else if(RegulatorTick[0] == 0) //Старт тик (1.1547 0.57735)
@@ -71,6 +73,7 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
 
         if(StCountr[id.x] < quantity)
         {
+            if(id.x != StCountr[id.x]){
             float3 DirOfView;
             DirOfView = normalize(PositionAtoms[StCountr[id.x]].xyz - PositionAtoms[id.x].xyz);
             float NewObg;
@@ -85,39 +88,37 @@ void AtomGroup (uint3 id : SV_DispatchThreadID)
                         {
                             if(DirOfView.z > -0.57735)
                             {//z
-                                if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[4]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                                if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[4]].xyz, PositionAtoms[id.x].xyz) >= NewObg){
                                 Atomsroommates[id.x].uintHoneycombs[4] = StCountr[id.x];}
                             }else{//-z
-                                if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[5]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                                if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[5]].xyz, PositionAtoms[id.x].xyz) >= NewObg){
                                 Atomsroommates[id.x].uintHoneycombs[5] = StCountr[id.x];}
                             }
                         }else{//y
-                            if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[2]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                            if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[2]].xyz, PositionAtoms[id.x].xyz) >= NewObg){
                             Atomsroommates[id.x].uintHoneycombs[2] = StCountr[id.x];}
                         }
                     }else{//-y
-                        if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[3]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                        if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[3]].xyz, PositionAtoms[id.x].xyz) >= NewObg){
                         Atomsroommates[id.x].uintHoneycombs[3] = StCountr[id.x];}
                     }
                 }else{//x
-                    if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[0]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                    if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[0]].xyz, PositionAtoms[id.x].xyz) >= NewObg){
                     Atomsroommates[id.x].uintHoneycombs[0] = StCountr[id.x];}
                 }
             }else{//-x
-                if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[1]].xyz, PositionAtoms[id.x].xyz) > NewObg){
+                if(distance(PositionAtoms[Atomsroommates[id.x].uintHoneycombs[1]].xyz, PositionAtoms[id.x].xyz) >= NewObg){
                 Atomsroommates[id.x].uintHoneycombs[1] = StCountr[id.x];}
             }
-            Atomsroommates[id.x].uintHoneycombs[0] = 0;//x
-        Atomsroommates[id.x].uintHoneycombs[1] = 1;//-x
-        Atomsroommates[id.x].uintHoneycombs[2] = 2;//y
-        Atomsroommates[id.x].uintHoneycombs[3] = 0;//-y
-        Atomsroommates[id.x].uintHoneycombs[4] = 0;//z
-        Atomsroommates[id.x].uintHoneycombs[5] = 0;//-z
+            }
             StCountr[id.x]++;
         }else{
-            Atomsroommates[id.x].divider = 10000;
+            Atomsroommates[id.x].divider = 100;
             Atomsroommates[id.x].counter = 0;
+            if(id.x == quantity)
+            {
             RegulatorTick[0] = 1;
+            }
         }
         /*Atomsroommates[id.x].uintHoneycombs[0] = 0;//x
         Atomsroommates[id.x].uintHoneycombs[1] = 1;//-x
