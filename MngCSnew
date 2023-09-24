@@ -1,0 +1,84 @@
+//using System.Numerics;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class CPMng : MonoBehaviour
+{
+    [SerializeField] private bool blStarts;
+    [SerializeField] private int NGpr = 1;
+
+    [SerializeField] private ComputeShader _shader;
+    private int _kernelIndex;
+
+    private ComputeBuffer _ResultBuffer;
+    private ComputeBuffer _ColorsBuffer;
+    private ComputeBuffer _AtomBuffer;
+    private ComputeBuffer _RayBuffer;
+    private ComputeBuffer _PlayPosBuffer;
+    private ComputeBuffer _PlayDirBuffer;
+    private ComputeBuffer _ItsBuffer;
+
+    [SerializeField] private Vector4[] _ResultV4;
+    [SerializeField] private Vector4[] _ColorsV4;
+    
+
+    // Start is called before the first frame update
+    void Awake()
+    {
+        _kernelIndex = _shader.FindKernel("GPPX");
+
+        _ResultBuffer = new ComputeBuffer(NGpr, sizeof(float) * 4);
+        _ColorsBuffer = new ComputeBuffer(NGpr, sizeof(float) * 4);
+        _AtomBuffer = new ComputeBuffer(NGpr, sizeof(float) * 4);
+        _RayBuffer = new ComputeBuffer(NGpr, sizeof(float) * 4);
+        _PlayPosBuffer = new ComputeBuffer(NGpr, sizeof(float) * 4);
+        _PlayDirBuffer = new ComputeBuffer(NGpr, sizeof(float) * 4);
+        _ItsBuffer = new ComputeBuffer(NGpr, sizeof(int) * 8);
+
+        _ResultV4 = new Vector4[NGpr];
+        _ColorsV4 = new Vector4[NGpr];
+        _ColorsV4[0] = new Vector4(1, 0, 0, 0);
+        _ColorsV4[1] = new Vector4(-10, 1, 1, 0);
+        _ColorsV4[2] = new Vector4(-10, 1, 1, 0);
+        _ColorsV4[3] = new Vector4(1, 0, 0, 0);
+
+        _shader.SetInt("NumThread", NGpr);
+
+        _shader.SetBuffer(_kernelIndex, "Result", _ResultBuffer);
+        _shader.SetBuffer(_kernelIndex, "Colors", _ColorsBuffer);
+        _shader.SetBuffer(_kernelIndex, "AtPos", _AtomBuffer);
+        _shader.SetBuffer(_kernelIndex, "RayDir", _RayBuffer);
+        _shader.SetBuffer(_kernelIndex, "PlayPos", _PlayPosBuffer);
+        _shader.SetBuffer(_kernelIndex, "PlayDir", _PlayDirBuffer);
+        _shader.SetBuffer(_kernelIndex, "AtIts", _ItsBuffer);
+
+        blStarts = true;
+        _shader.SetBool("StBl", blStarts);
+        _ColorsBuffer.SetData(_ColorsV4);
+    }
+
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        if(blStarts)
+        _shader.Dispatch(_kernelIndex, NGpr,1,1);
+        _ResultBuffer.GetData(_ResultV4);
+        _ColorsBuffer.SetData(_ColorsV4);
+    }
+
+    private void OnDestroy()
+    {
+        blStarts = false;
+        _shader.SetBool("StBl", blStarts);
+        //_buffer.Dispose();
+        _ResultBuffer.Dispose();
+        _ColorsBuffer.Dispose();
+        _AtomBuffer.Dispose();
+        _RayBuffer.Dispose();
+        _PlayPosBuffer.Dispose();
+        _PlayDirBuffer.Dispose();
+        _ItsBuffer.Dispose();
+    }
+}
