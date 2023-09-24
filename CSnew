@@ -1,0 +1,110 @@
+#pragma kernel GPPX
+struct ints{
+int ins[8];
+};
+
+int NumThread;
+bool StBl;
+
+RWStructuredBuffer<float4> Result;//for
+
+RWStructuredBuffer<float4> Colors;//in
+
+RWStructuredBuffer<float4> PlayPos;//in
+RWStructuredBuffer<float4> PlayDir;//in
+
+RWStructuredBuffer<float4> AtPos;//in
+RWStructuredBuffer<ints> AtIts;//in
+/*RWStructuredBuffer<float4> AtPosA;//for
+RWStructuredBuffer<float4> AtPosB;//for
+RWStructuredBuffer<float4> AtPosC;//for
+RWStructuredBuffer<float4> AtPosD;//for
+RWStructuredBuffer<float4> AtPosE;//for
+RWStructuredBuffer<float4> AtPosF;//for
+RWStructuredBuffer<float4> AtPosAin;//in
+RWStructuredBuffer<float4> AtPosBin;//in
+RWStructuredBuffer<float4> AtPosCin;//in
+RWStructuredBuffer<float4> AtPosDin;//in
+RWStructuredBuffer<float4> AtPosEin;//in
+RWStructuredBuffer<float4> AtPosFin;//in*/
+
+//RWStructuredBuffer<float4> FXPosF;//in
+
+RWStructuredBuffer<float4> RayDir;//in
+/*RWStructuredBuffer<float4> RayDirA;//for
+RWStructuredBuffer<float4> RayDirB;//for
+RWStructuredBuffer<float4> RayDirC;//for
+RWStructuredBuffer<float4> RayDirD;//for
+RWStructuredBuffer<float4> RayDirE;//for
+RWStructuredBuffer<float4> RayDirF;//for
+RWStructuredBuffer<float4> RayDirAin;//in
+RWStructuredBuffer<float4> RayDirBin;//in
+RWStructuredBuffer<float4> RayDirCin;//in
+RWStructuredBuffer<float4> RayDirDin;//in
+RWStructuredBuffer<float4> RayDirEin;//in
+RWStructuredBuffer<float4> RayDirFin;//in*/
+
+/*float fonts(float zagadka)//0.7071 + 0.2929 = 1
+{
+    AtIts[id.x].ins[7] = 0;
+    while(AtIts[id.x].ins[7] < NumThread)
+    {
+        if(id.x != AtIts[id.x].ins[7])
+     if(AtPos[AtIts[id.x].ins[7]].x - AtPos[id.x].x > 0.2929)
+     {
+
+     }else{
+        AtIts[id.x].ins[0] = AtIts[id.x].ins[7];//-x
+     }
+    
+    }
+}*/
+
+/*float fonts(float zagadka)//0.7071
+{
+if(AtPos[id.x].x - )
+}*/
+
+[numthreads(1,1,1)]
+void GPPX (uint3 id : SV_DispatchThreadID)
+{
+    if(StBl)
+    if(AtIts[id.x].ins[7] == 199)
+    {
+     Result[id.x].xyz = Colors[id.x].xyz;
+     
+     //AtIts[id.x].ins[6] = 0;
+    }
+    else
+    {
+        bool itsone = true;
+     while(AtIts[id.x].ins[6] < NumThread - 1)
+     {
+        if(id.x != AtIts[id.x].ins[6])
+        {
+            float PosFX = AtPos[AtIts[id.x].ins[6]].x - AtPos[id.x].x;
+            float PosFY = AtPos[AtIts[id.x].ins[6]].y - AtPos[id.x].y;
+            float PosFZ = AtPos[AtIts[id.x].ins[6]].z - AtPos[id.x].z;
+            float3 PosFXYZ;
+            /*PosFXYZ.x = PosFX;
+            PosFXYZ.y = PosFY;
+            PosFXYZ.z = PosFZ;*/
+            PosFXYZ = Colors[AtIts[id.x].ins[6]].xyz;
+            PosFXYZ = normalize(PosFXYZ);
+            if(PosFXYZ.x > -0.7071){
+                
+            }else{
+                if(itsone || distance(AtPos[id.x], AtPos[AtIts[id.x].ins[0]]) < distance(AtPos[id.x], AtPos[AtIts[id.x].ins[6]]))
+                {
+                 itsone = false;
+                 Result[id.x].xyz = PosFXYZ;
+                 Result[id.x].w = AtIts[id.x].ins[6];
+                 AtIts[id.x].ins[0] = AtIts[id.x].ins[6];//-x
+                }
+            }
+        }
+      AtIts[id.x].ins[6]++;
+     }
+     AtIts[id.x].ins[7] = 1;
+    }
+}
